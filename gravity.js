@@ -2,17 +2,35 @@
 
 var planets = [
   {
-    x: 50,
+    mass: 200,
+    x: 200,
+    y: 350,
+    vx: -2,
+    vy: 0,
+    radius: 15
+  },
+  {
+    mass: 80,
+    x: 250,
+    y: 350,
+    vx: -2,
+    vy: 0,
+    radius: 8
+  },
+  {
+    mass: 100,
+    x: 250,
     y: 50,
-    vx: 1,
+    vx: 2,
     vy: 0,
     radius: 10
   },
   {
-    x: 100,
-    y: 50,
-    vx: 1,
-    vy: 2,
+    mass: 1000,
+    x: 250,
+    y: 250,
+    vx: 0,
+    vy: 0,
     radius: 30
   }
 ];
@@ -56,6 +74,7 @@ function draw(ctx, planet) {
   ctx.beginPath();
   ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2, true);
   ctx.fill();
+  ctx.stroke();
 }
 
 function advance() {
@@ -66,11 +85,16 @@ function advance() {
     p0.y += p0.vy;
 
     for (var j = 0; j < len; j++) {
-      if (i == j) break;
+      if (i == j) continue;
       var p1 = planets[j];
+      var massRatio = p1.mass / p0.mass;
 
-      var dx = p0.x - p1.x;
-      var dy = p0.y - p1.y;
+      var dx = p1.x - p0.x;
+      var dy = p1.y - p0.y;
+      var d2 = dx*dx + dy*dy;
+
+      p0.vx += dx / d2 * massRatio;
+      p0.vy += dy / d2 * massRatio;
     }
   }
 }

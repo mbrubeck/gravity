@@ -88,19 +88,22 @@ function advance() {
     var p0 = planets[i];
     p0.x += p0.vx;
     p0.y += p0.vy;
+    p0.dx = p0.dy = 0;
 
     for (var j = 0; j < len; j++) {
       if (i == j) continue;
       var p1 = planets[j];
+
       var massRatio = p1.mass / p0.mass;
+      var x = p1.x - p0.x;
+      var y = p1.y - p0.y;
+      var d2 = x*x + y*y;
 
-      var dx = p1.x - p0.x;
-      var dy = p1.y - p0.y;
-      var d2 = dx*dx + dy*dy;
-
-      p0.vx += dx / d2 * massRatio;
-      p0.vy += dy / d2 * massRatio;
+      p0.dx += x / d2 * massRatio;
+      p0.dy += y / d2 * massRatio;
     }
+    p0.vx += p0.dx;
+    p0.vy += p0.dy;
   }
 }
 

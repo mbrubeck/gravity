@@ -35,14 +35,13 @@ var planets = [
   }
 ];
 
-var dir = 1;
+var dir = 0;
+var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+                        window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
-function start() {
-  var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-                          window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-
+function forward() {
   function step() {
-    if (dir == 0) return;
+    if (dir < 1) return;
     drawFrame();
     advance();
     requestAnimationFrame(step);
@@ -50,11 +49,19 @@ function start() {
   step();
 }
 
-start();
+function reverse() {
+  function step() {
+    if (dir > -1) return;
+    drawFrame();
+    retreat();
+    requestAnimationFrame(step);
+  }
+  step();
+}
 
 function pause()  { dir =  0; }
-function play()   { dir =  1; start(); }
-function rewind() { dir = -1; start(); }
+function play()   { dir =  1; forward(); }
+function rewind() { dir = -1; reverse(); }
 
 function drawFrame() {
   var ctx = document.getElementById("c").getContext('2d');
@@ -76,18 +83,20 @@ function draw(ctx, planet) {
 }
 
 
-// d0 = f(p0)
-// p1 = p0 + v0
-// v1 = v0 + d0
-
-
-
 function advance() {
+  // p1 = p0 + v0
+  // d1 = f(p1)
+  // v1 = v0 + d1
+
   var len = planets.length;
   for (var i = 0; i < len; i++) {
     var p0 = planets[i];
     p0.x += p0.vx;
     p0.y += p0.vy;
+  }
+
+  for (var i = 0; i < len; i++) {
+    var p0 = planets[i];
     p0.dx = p0.dy = 0;
 
     for (var j = 0; j < len; j++) {
@@ -102,8 +111,49 @@ function advance() {
       p0.dx += x / d2 * massRatio;
       p0.dy += y / d2 * massRatio;
     }
+  }
+
+  for (var i = 0; i < len; i++) {
+    var p0 = planets[i];
     p0.vx += p0.dx;
     p0.vy += p0.dy;
+  }
+}
+
+function retreat() {
+  // v0 = v1 - d1
+  // p0 = p1 - v0
+  // d0 = f(p0)
+
+  var len = planets.length;
+  for (var i = 0; i < len; i++) {
+    var p0 = planets[i];
+    p0.vx -= p0.dx;
+    p0.vy -= p0.dy;
+  }
+
+  for (var i = 0; i < len; i++) {
+    var p0 = planets[i];
+    p0.x -= p0.vx;
+    p0.y -= p0.vy;
+  }
+
+  for (var i = 0; i < len; i++) {
+    var p0 = planets[i];
+    p0.dx = p0.dy = 0;
+
+    for (var j = 0; j < len; j++) {
+      if (i == j) continue;
+      var p1 = planets[j];
+
+      var massRatio = p1.mass / p0.mass;
+      var x = p1.x - p0.x;
+      var y = p1.y - p0.y;
+      var d2 = x*x + y*y;
+
+      p0.dx += x / d2 * massRatio;
+      p0.dy += y / d2 * massRatio;
+    }
   }
 }
 

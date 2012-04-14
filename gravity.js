@@ -35,14 +35,14 @@ var planets = [
   }
 ];
 
-var paused = false;
+var dir = 1;
 
 function start() {
   var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                           window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
   function step() {
-    if (paused) return;
+    if (dir == 0) return;
     drawFrame();
     advance();
     requestAnimationFrame(step);
@@ -50,13 +50,11 @@ function start() {
   step();
 }
 
-function pause() {
-  paused = !paused;
-  if (!paused)
-    start();
-}
-
 start();
+
+function pause()  { dir =  0; }
+function play()   { dir =  1; start(); }
+function rewind() { dir = -1; start(); }
 
 function drawFrame() {
   var ctx = document.getElementById("c").getContext('2d');
@@ -76,6 +74,13 @@ function draw(ctx, planet) {
   ctx.fill();
   ctx.stroke();
 }
+
+
+// d0 = f(p0)
+// p1 = p0 + v0
+// v1 = v0 + d0
+
+
 
 function advance() {
   var len = planets.length;

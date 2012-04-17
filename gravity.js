@@ -7,7 +7,7 @@ var planets = [
     y: 350,
     vx: -2,
     vy: 0,
-    radius: 15
+    radius: 12
   },
   {
     mass: 80,
@@ -26,12 +26,12 @@ var planets = [
     radius: 10
   },
   {
-    mass: 1000,
+    mass: 1500,
     x: 250,
     y: 250,
     vx: 0,
     vy: 0,
-    radius: 30
+    radius: 25
   }
 ];
 
@@ -39,10 +39,17 @@ var dir = 0;
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                         window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
+var canvas = document.getElementById("c");
+var ctx = canvas.getContext('2d');
+
+function draw() {
+  drawFrame(canvas, ctx);
+}
+
 function forward() {
   function step() {
     if (dir < 1) return;
-    drawFrame();
+    drawFrame(canvas, ctx);
     advance();
     requestAnimationFrame(step);
   }
@@ -52,7 +59,7 @@ function forward() {
 function reverse() {
   function step() {
     if (dir > -1) return;
-    drawFrame();
+    drawFrame(canvas, ctx);
     retreat();
     requestAnimationFrame(step);
   }
@@ -63,18 +70,20 @@ function pause()  { dir =  0; }
 function play()   { dir =  1; forward(); }
 function rewind() { dir = -1; reverse(); }
 
-function drawFrame() {
-  var ctx = document.getElementById("c").getContext('2d');
-  ctx.clearRect(0, 0, 500, 500);
+function drawFrame(canvas, ctx) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawPlanets(ctx);
+}
 
+function drawPlanets(ctx) {
   var len = planets.length;
   for (var i = 0; i < len; i++) {
     var planet = planets[i];
-    draw(ctx, planet);
+    drawPlanet(ctx, planet);
   }
 }
 
-function draw(ctx, planet) {
+function drawPlanet(ctx, planet) {
   ctx.fillStyle = "rgb(200, 200, 200)";
   ctx.beginPath();
   ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2, true);

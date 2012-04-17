@@ -1,6 +1,6 @@
 "use strict";
 
-var planets = [
+var gPlanets = [
   {
     mass: 200,
     x: 200,
@@ -39,18 +39,19 @@ var dir = 0;
 var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
                         window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
-var canvas = document.getElementById("c");
-var ctx = canvas.getContext('2d');
+var gCanvas = document.getElementById("c");
+var gContext = gCanvas.getContext('2d');
 
 function draw() {
-  drawFrame(canvas, ctx);
+  drawFrame(gCanvas, gContext);
+  drawPaths(gContext, gPlanets);
 }
 
 function forward() {
   function step() {
     if (dir < 1) return;
-    drawFrame(canvas, ctx);
-    advance();
+    drawFrame(gCanvas, gContext);
+    advance(gPlanets);
     requestAnimationFrame(step);
   }
   step();
@@ -59,23 +60,23 @@ function forward() {
 function reverse() {
   function step() {
     if (dir > -1) return;
-    drawFrame(canvas, ctx);
-    retreat();
+    drawFrame(gCanvas, gContext);
+    retreat(gPlanets);
     requestAnimationFrame(step);
   }
   step();
 }
 
-function pause()  { dir =  0; }
+function pause()  { dir =  0; draw(); }
 function play()   { dir =  1; forward(); }
 function rewind() { dir = -1; reverse(); }
 
 function drawFrame(canvas, ctx) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawPlanets(ctx);
+  drawPlanets(ctx, gPlanets);
 }
 
-function drawPlanets(ctx) {
+function drawPlanets(ctx, planets) {
   var len = planets.length;
   for (var i = 0; i < len; i++) {
     var planet = planets[i];
@@ -91,8 +92,25 @@ function drawPlanet(ctx, planet) {
   ctx.stroke();
 }
 
+function drawPaths(ctx, planets) {
+  var temp = copy(planets);
+  var len = temp.length;
+  for (var dot = 0; dot < 30; dot++) {
+    for (var f = 0; f < 6; f++)
+      advance(temp);
+    for (var i = 0; i < len; i++)
+      drawDot(ctx, temp[i]);
+  }
+}
 
-function advance() {
+function drawDot(ctx, planet) {
+  ctx.fillStyle = "rgb(200, 200, 200)";
+  ctx.beginPath();
+  ctx.arc(planet.x, planet.y, 3, 0, Math.PI * 2, true);
+  ctx.fill();
+}
+
+function advance(planets) {
   // p1 = p0 + v0
   // d1 = f(p1)
   // v1 = v0 + d1
@@ -129,7 +147,7 @@ function advance() {
   }
 }
 
-function retreat() {
+function retreat(planets) {
   // v0 = v1 - d1
   // p0 = p1 - v0
   // d0 = f(p0)
@@ -172,4 +190,15 @@ function distance(p0, p1) {
 
 function status(msg) {
   document.getElementById("status").textContent = msg;
+}
+
+function copy(a) {
+  if (typeof a == "object") {
+    var b = a instanceof Array ? [] : {};
+    for (var i in a)
+      if (a.hasOwnProperty(i))
+        b[i] = copy(a[i]);
+    return b;
+  }
+  return a;
 }
